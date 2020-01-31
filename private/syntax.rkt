@@ -8,9 +8,31 @@
 
 (provide #%rkexec)
 
-(define-simple-macro (#%rkexec xs:id ...+)
-  #:with (s* ...)
-  (for/list ([x (in-syntax #'(xs ...))])
-    (datum->syntax x (symbol->string
-                       (syntax->datum x))))
-  (system* s* ...))
+(begin-for-syntax
+  (define (identifier->string id)
+    (symbol->string (syntax-e id)))
+
+  (define (exec-value-$var-id? id)
+    (char=? #\$ (string-ref (identifier->string id) 0)))
+
+  (define (exec-value-@var-id? id)
+    (char=? #\@ (string-ref (identifier->string id) 0)))
+
+  (define (exec-value-var-id id)
+    (define id-str
+      (substring (identifier->string id) 1))
+    (datum->syntax id (string->symbol id-str)))
+
+  (define-syntax-class rkexec-elem
+    [pattern e:id
+      #:when (exec-value-$var-id? #'e)
+      #:attr expr #`(unquote #,(exec-value-var-id #'e))]
+    [pattern e:id
+      #:when (exec-value-@var-id? #'e)
+      #:attr expr #`(unquote-splicing #,(exec-value-var-id #'e))]
+    [pattern e:id
+      #:attr expr
+      (datum->syntax #'e (symbol->string (syntax->datum #'e)))]))
+
+(define-simple-macro (#%rkexec es:rkexec-elem ...+)
+  (apply system* (quasiquote (es.expr ...))))
