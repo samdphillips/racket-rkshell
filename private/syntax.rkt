@@ -26,13 +26,17 @@
   (define-syntax-class rkexec-elem
     [pattern e:id
       #:when (exec-value-$var-id? #'e)
-      #:attr expr #`(unquote #,(exec-value-var-id #'e))]
+      #:with var (exec-value-var-id #'e)
+      #:attr expr #'(unquote var)]
     [pattern e:id
       #:when (exec-value-@var-id? #'e)
-      #:attr expr #`(unquote-splicing #,(exec-value-var-id #'e))]
+      #:with var (exec-value-var-id #'e)
+      #:attr expr #'(unquote-splicing var)]
     [pattern e:id
       #:attr expr
-      (datum->syntax #'e (symbol->string (syntax->datum #'e)))]))
+      (datum->syntax #'e (symbol->string (syntax->datum #'e)))]
+    [pattern (e arg ...)
+      #:attr expr #'(unquote (e arg ...))]))
 
 (define-simple-macro (#%rkexec es:rkexec-elem ...+)
   (apply system* (quasiquote (es.expr ...))))
