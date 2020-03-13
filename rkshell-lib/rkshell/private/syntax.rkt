@@ -3,8 +3,8 @@
 (require (for-syntax racket/base
                      racket/sequence
                      syntax/parse)
-         racket/system
-         syntax/parse/define)
+         syntax/parse/define
+         "runtime.rkt")
 
 (provide #%rkexec)
 
@@ -39,4 +39,4 @@
       #:attr expr #'(unquote (e arg ...))]))
 
 (define-simple-macro (#%rkexec es:rkexec-elem ...+)
-  (apply system* (quasiquote (es.expr ...))))
+  (apply (rkexec-runner) (quasiquote (es.expr ...))))
