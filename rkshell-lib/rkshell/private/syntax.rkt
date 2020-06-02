@@ -35,6 +35,8 @@
     [pattern e:id
       #:attr expr
       (datum->syntax #'e (symbol->string (syntax->datum #'e)))]
+    [pattern e:str
+      #:attr expr #'e]
     [pattern (e arg ...)
       #:attr expr #'(unquote (e arg ...))]))
 
