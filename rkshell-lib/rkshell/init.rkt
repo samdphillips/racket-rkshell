@@ -3,7 +3,13 @@
 ;; setup for racket repl
 
 (require rkshell/private/reader
+         rkshell/private/repl
          (submod rkshell/private/lang full))
+
 (define rkshell-readtable (make-rkshell-readtable))
 (current-readtable rkshell-readtable)
-(provide (all-from-out (submod rkshell/private/lang full)))
+
+(rkexec-runner rkshell-repl-runner)
+
+(provide (all-from-out rkshell/private/repl
+                       (submod rkshell/private/lang full)))
